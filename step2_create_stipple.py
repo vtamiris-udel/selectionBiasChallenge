@@ -62,10 +62,10 @@ def create_stipple(
         extreme_threshold_high=extreme_threshold_high,
         extreme_sigma=extreme_sigma
     )
-    print("Importance map computed")
+    # print("Importance map computed")
     
     # Generate stippling pattern
-    print("Generating blue noise stippling pattern...")
+    # print("Generating blue noise stippling pattern...")
     stipple_pattern, samples = void_and_cluster(
         gray_img,
         percentage=percentage,
@@ -75,10 +75,9 @@ def create_stipple(
         noise_scale_factor=noise_scale_factor
     )
     
-    print(f"Generated {len(samples)} stipple points")
-    print(f"Stipple pattern shape: {stipple_pattern.shape}")
-    print(f"Number of stippled points (0.0 values): {np.sum(stipple_pattern == 0.0)}")
-    print(f"Number of background points (1.0 values): {np.sum(stipple_pattern == 1.0)}")
+    # print(f"Generated {len(samples)} stipple points")
+    # print(f"Stipple pattern shape: {stipple_pattern.shape}")
+    # print(f"Number of stippled points (0.0 values): {np.sum(stipple_pattern == 0.0)}")
+    # print(f"Number of background points (1.0 values): {np.sum(stipple_pattern == 1.0)}")
     
     return stipple_pattern, samples
-

@@ -1,0 +1,208 @@
+---
+title: "Selection Bias & Missing Data Challenge"
+subtitle: "Creating a Statistics Meme: Write Your Own Functions"
+format:
+  html: default
+execute:
+  echo: false
+  eval: true
+---
+
+# 🎨 Selection Bias & Missing Data Challenge
+
+
+
+```{python}
+#| label: step1-prepare
+#| echo: false
+#| fig-cap: "Original image prepared for processing"
+
+import numpy as np
+import matplotlib.pyplot as plt
+from step1_prepare_image import prepare_image
+
+# Load and prepare the image
+# CHANGE THIS to use your own image!
+img_path = 'Venkat.jpeg'  # Example image - replace with your own image
+gray_image = prepare_image(img_path, max_size=512)
+
+# Display the prepared image
+fig, ax = plt.subplots(figsize=(6.5, 5))
+#ax.imshow(gray_image, cmap='gray', vmin=0, vmax=1)
+ax.axis('off')
+#ax.set_title('Step 1: Prepared Image', fontsize=14, fontweight='bold', pad=10)
+#plt.tight_layout()
+#plt.show()
+```
+
+
+
+```{python}
+#| label: step2-stipple
+#| echo: false
+#| fig-cap: "Blue noise stippling pattern"
+#| message: false
+#| warning: false
+
+from step2_create_stipple import create_stipple
+
+# Create stippled image
+stipple_pattern, samples = create_stipple(
+    gray_image,
+    percentage=0.08,  # 8% of pixels will be stippled
+    sigma=0.9,  # Repulsion radius
+    content_bias=0.9,  # Strongly follow importance map
+    noise_scale_factor=0.1,  # Moderate exploration
+    extreme_downweight=0.5,  # Moderate downweighting of extremes
+    extreme_threshold_low=0.2,  # Downweight tones below 0.2
+    extreme_threshold_high=0.8,  # Downweight tones above 0.8
+    extreme_sigma=0.1  # Smooth transition width
+)
+
+# Display the stippled image
+fig, ax = plt.subplots(figsize=(6.5, 5))
+#ax.imshow(stipple_pattern, cmap='gray', vmin=0, vmax=1)
+ax.axis('off')
+#ax.set_title('Step 2: Stippled Image', fontsize=14, fontweight='bold', pad=10)
+# plt.tight_layout()
+# plt.show()
+```
+
+
+```{python}
+#| label: step3-tonal
+#| echo: false
+#| fig-cap: "Box-averaged tonal analysis showing brightness distribution"
+
+from step3_create_tonal import create_tonal
+import matplotlib.pyplot as plt
+
+# Create tonal analysis with a 16×12 grid
+grid_rows = 16
+grid_cols = 12
+tonal_image, average_tones, tonal_stats = create_tonal(
+    gray_image,
+    grid_rows=grid_rows,
+    grid_cols=grid_cols,
+    return_full_image=True
+)
+
+# Display the box-averaged tonal image with text annotations
+fig, ax = plt.subplots(figsize=(6.5, 5))
+
+# Show box-averaged tonal image
+ax.imshow(tonal_image, cmap='gray', vmin=0, vmax=1)
+ax.axis('off')
+#ax.set_title('Step 3: Box-Averaged Tonal Analysis', fontsize=14, fontweight='bold', pad=10)
+
+# Calculate grid cell dimensions for text placement
+h, w = gray_image.shape
+section_h = h / grid_rows
+section_w = w / grid_cols
+
+# Add text annotations showing tone values (2 decimals) at the center of each grid cell
+for i in range(grid_rows):
+    for j in range(grid_cols):
+        tone = average_tones[i, j]
+        # Calculate center position of the grid cell
+        y_center = (i + 0.5) * section_h
+        x_center = (j + 0.5) * section_w
+        # Use white text for dark sections, black text for light sections
+        text_color = 'white' if tone < 0.5 else 'black'
+        ax.text(x_center, y_center, f'{tone:.2f}', 
+                ha='center', va='center', 
+                color=text_color, fontsize=6, fontweight='bold')
+
+#plt.tight_layout()
+#plt.show()
+```
+
+
+```{python}
+#| label: step4-block-letter
+#| echo: false
+#| fig-cap: "Block letter S representing selection bias"
+#| eval: true
+
+# UNCOMMENT AND USE THIS ONCE YOU'VE WRITTEN step4_create_block_letter.py:
+from step4_create_block_letter import create_block_letter_s
+
+# Get image dimensions
+h, w = gray_image.shape
+
+# Create block letter S
+block_letter = create_block_letter_s(h, w, letter="S", font_size_ratio=0.9)
+
+# Display the block letter
+fig, ax = plt.subplots(figsize=(6.5, 5))
+#ax.imshow(block_letter, cmap='gray', vmin=0, vmax=1)
+#ax.axis('off')
+#ax.set_title('Step 4: Selection Bias (Block Letter S)', fontsize=14, fontweight='bold', pad=10)
+# plt.tight_layout()
+# plt.show()
+```
+
+```{python}
+#| label: step5-masked
+#| echo: false
+#| fig-cap: "Masked stippled image showing selection bias effect"
+#| eval: true
+
+# UNCOMMENT AND USE THIS ONCE YOU'VE WRITTEN step5_create_masked.py:
+from step5_create_masked import create_masked_stipple
+
+# Create masked stippled image
+masked_stipple = create_masked_stipple(
+    stipple_pattern,
+    block_letter,
+    threshold=0.5  # Pixels below 0.5 are considered part of the mask
+)
+
+# Display the masked image
+fig, ax = plt.subplots(figsize=(6.5, 5))
+#ax.imshow(masked_stipple, cmap='gray', vmin=0, vmax=1)
+ax.axis('off')
+#ax.set_title('Step 5: Masked Stippled Image (Estimate)', fontsize=14, fontweight='bold', pad=10)
+# plt.tight_layout()
+# plt.show()
+```
+
+
+```{python}
+#| label: create-final-meme
+#| echo: false
+#| eval: true
+
+# UNCOMMENT AND USE THIS ONCE YOU'VE WRITTEN create_meme.py:
+from create_meme import create_statistics_meme
+
+# Create the final meme
+create_statistics_meme(
+    original_img=gray_image,
+    stipple_img=stipple_pattern,
+    block_letter_img=block_letter,
+    masked_stipple_img=masked_stipple,
+    output_path="my_statistics_meme.png",
+    dpi=150,
+    background_color="gray"  # or "pink", "lightgray", etc.
+)
+```
+
+
+
+```{python}
+#| label: final-meme
+#| echo: false
+#| eval: true
+#| fig-cap: "Statistics meme demonstrating selection bias"
+
+# Your code to create and display the meme goes here
+# (all the steps above, uncommented and working)
+
+# Display the final meme
+from IPython.display import Image, display
+display(Image("my_statistics_meme.png"))
+```
+
+
+This meme shows how selective gaps can warp what we think we know. The original photo is reality; the stippled version is our data. Imposing the bold “S” cuts out a whole swath of points, and the final estimate inherits that hole—so the pattern we don’t sample shapes the story we tell.
